@@ -1,0 +1,678 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
+.app{min-height:100vh;padding:0}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:#1A1A2E;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#F5A623;letter-spacing:-0.5px}
+.logo-text{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.logo-sub{font-size:12px;color:var(--color-text-secondary)}
+.topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:7px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-primary);font-family:var(--font-sans);transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#1A1A2E;color:#F5A623;border-color:#1A1A2E}
+.btn-primary:hover{background:#0D0D1A}
+.btn-danger{background:#E94560;color:#fff;border-color:#E94560}
+.btn-danger:hover{background:#c73353}
+.main{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 61px)}
+.sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px;overflow-y:auto}
+.sidebar-section{margin-bottom:20px}
+.sidebar-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.ctrl-row{margin-bottom:10px}
+.ctrl-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;display:flex;justify-content:space-between}
+.ctrl-val{font-weight:500;color:var(--color-text-primary)}
+select,input[type=range]{width:100%}
+select{font-size:13px;font-family:var(--font-sans)}
+.mine-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto}
+.mine-chip{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;transition:background 0.1s;border:0.5px solid transparent}
+.mine-chip.active{background:var(--color-background-secondary);border-color:var(--color-border-secondary)}
+.mine-chip:hover{background:var(--color-background-secondary)}
+.mine-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.content{padding:20px;overflow-y:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.metric-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:500}
+.chart-wrap{position:relative;width:100%}
+.anomaly-table{width:100%;border-collapse:collapse;font-size:12px}
+.anomaly-table th{padding:7px 10px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap}
+.anomaly-table td{padding:7px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.anomaly-table tr:last-child td{border-bottom:none}
+.anomaly-table tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500}
+.badge-spike{background:#FAECE7;color:#993C1D}
+.badge-drop{background:#E6F1FB;color:#185FA5}
+.badge-neutral{background:#F1EFE8;color:#5F5E5A}
+.tab-row{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all 0.15s}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.loader{text-align:center;padding:60px;color:var(--color-text-secondary);font-size:14px}
+.status-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:12px;color:var(--color-text-secondary);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;flex-shrink:0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.main{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:0.5px solid var(--color-border-tertiary)}.two-col{grid-template-columns:1fr}}
+.pdf-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center}
+.pdf-modal-bg.open{display:flex}
+.pdf-modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:24px;max-width:480px;width:100%;margin:20px}
+.params-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.params-table td{padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.params-table td:first-child{color:var(--color-text-secondary);width:55%}
+</style>
+
+<div class="app">
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">WY</div>
+    <div>
+      <div class="logo-text">Weyland-Yutani Corp</div>
+      <div class="logo-sub">Mine Production Analytics</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <select id="mineSelect" style="font-size:13px;padding:7px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer"></select>
+    <button class="btn" id="refreshBtn">↻ Refresh data</button>
+    <button class="btn btn-primary" id="pdfBtn">↓ Export PDF report</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Chart type</div>
+      <div class="ctrl-row">
+        <select id="chartType">
+          <option value="line">Line chart</option>
+          <option value="bar">Bar chart</option>
+          <option value="stacked">Stacked bar</option>
+        </select>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Trendline</div>
+      <div class="ctrl-row">
+        <select id="trendDeg">
+          <option value="0">None</option>
+          <option value="1">Linear (degree 1)</option>
+          <option value="2">Polynomial degree 2</option>
+          <option value="3">Polynomial degree 3</option>
+          <option value="4">Polynomial degree 4</option>
+        </select>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Anomaly detection</div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>IQR multiplier</span><span class="ctrl-val" id="iqrVal">1.5</span></div>
+        <input type="range" id="iqrMult" min="0.5" max="4" step="0.1" value="1.5">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>Z-score threshold</span><span class="ctrl-val" id="zscoreVal">2.5</span></div>
+        <input type="range" id="zscoreThresh" min="1" max="5" step="0.1" value="2.5">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>Moving avg window</span><span class="ctrl-val" id="maWinVal">7</span></div>
+        <input type="range" id="maWin" min="3" max="30" step="1" value="7">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>MA deviation %</span><span class="ctrl-val" id="maPctVal">25</span></div>
+        <input type="range" id="maPct" min="5" max="80" step="1" value="25">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>Grubbs significance</span><span class="ctrl-val" id="grubbsVal">0.05</span></div>
+        <input type="range" id="grubbsSig" min="0.01" max="0.15" step="0.01" value="0.05">
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Mines visible</div>
+      <div class="mine-list" id="mineList"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Date range</div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>Start offset (days)</span><span class="ctrl-val" id="startOff">0</span></div>
+        <input type="range" id="startRange" min="0" max="300" step="1" value="0">
+      </div>
+      <div class="ctrl-row">
+        <div class="ctrl-label"><span>Window (days)</span><span class="ctrl-val" id="winLen">90</span></div>
+        <input type="range" id="winRange" min="14" max="365" step="1" value="90">
+      </div>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div class="loader" id="loaderMsg">Generating mine data...</div>
+  </div>
+</div>
+</div>
+
+<div class="pdf-modal-bg" id="pdfModal">
+  <div class="pdf-modal">
+    <div style="font-size:16px;font-weight:500;margin-bottom:8px">Generate PDF report</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px">The report includes statistics, anomaly tables, and charts for all mines.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" id="pdfCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="pdfConfirmBtn">Generate & download</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const MINE_COLORS = ['#E94560','#3B82F6','#F5A623','#1D9E75','#8B5CF6','#EC4899','#0EA5E9','#84CC16','#F97316','#6366F1'];
+const MINE_NAMES = ['LV-426 Alpha',"Hadley's Hope",'Fury-161','Sulaco Prime','Nostromo Deep'];
+const NUM_MINES = 5;
+const NUM_DAYS = 365;
+
+let allData = [], mineData = {}, filteredData = {}, visibleMines = new Set(MINE_NAMES);
+let charts = {};
+let params = {iqr:1.5, z:2.5, maWin:7, maPct:25, grubbs:0.05, startOff:0, winLen:90};
+
+function randn(){
+  let u=0,v=0;
+  while(u===0)u=Math.random();
+  while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function generateData(){
+  const base=1000, trend=0.15, alpha=0.7, sd=150;
+  const dowFactors={0:0.6,1:1.0,2:1.0,3:1.05,4:1.1,5:1.15,6:0.85};
+  const events=[
+    {day:73,dur:5,mag:300,prob:0.7},
+    {day:161,dur:3,mag:-500,prob:0.8},
+    {day:264,dur:7,mag:700,prob:0.5},
+    {day:304,dur:4,mag:-250,prob:0.9}
+  ];
+
+  allData=[];
+  mineData={};
+  MINE_NAMES.forEach(m=>mineData[m]=[]);
+
+  for(let d=0;d<NUM_DAYS;d++){
+    const dt=new Date(2025,0,1+d);
+    const dow=dt.getDay();
+    const trendVal=base+d*trend;
+    const dowFac=dowFactors[dow];
+    MINE_NAMES.forEach((mn,mi)=>{
+      let raw=randn()*sd+base;
+      let smoothed=d===0?raw:alpha*raw+(1-alpha)*(mineData[mn][d-1]?.smoothed||base);
+      let evEffect=0;
+      events.forEach(ev=>{
+        const t=d-ev.day;
+        const sigma=ev.dur/3;
+        const bell=ev.mag*Math.exp(-(t*t)/(2*sigma*sigma));
+        const seed=Math.abs(Math.sin((d+1)*7919*(mi+1)*31));
+        if(seed<ev.prob) evEffect+=bell;
+      });
+      const final=Math.max(0, smoothed*(trendVal/base)*dowFac+evEffect);
+      const row={date:new Date(dt),day:d,mine:mn,raw,smoothed,trend:trendVal,dow:dowFac,event:evEffect,value:final};
+      allData.push(row);
+      mineData[mn].push(row);
+    });
+  }
+}
+
+function getWindow(){
+  const s=params.startOff, e=Math.min(NUM_DAYS-1, s+params.winLen);
+  const filt={};
+  MINE_NAMES.forEach(mn=>{filt[mn]=mineData[mn].slice(s,e+1)});
+  return filt;
+}
+
+function stats(arr){
+  if(!arr.length) return {};
+  const v=arr.map(r=>r.value).sort((a,b)=>a-b);
+  const n=v.length;
+  const mean=v.reduce((a,b)=>a+b,0)/n;
+  const variance=v.reduce((a,b)=>a+(b-mean)**2,0)/n;
+  const sd=Math.sqrt(variance);
+  const q1=v[Math.floor(n*0.25)];
+  const q3=v[Math.floor(n*0.75)];
+  const med=n%2===0?(v[n/2-1]+v[n/2])/2:v[Math.floor(n/2)];
+  return {mean,sd,median:med,q1,q3,iqr:q3-q1,n};
+}
+
+function movingAvg(arr, win){
+  return arr.map((_,i)=>{
+    const s=Math.max(0,i-win+1);
+    const sl=arr.slice(s,i+1);
+    return sl.reduce((a,b)=>a+b,0)/sl.length;
+  });
+}
+
+function detectAnomalies(arr, st){
+  const vals=arr.map(r=>r.value);
+  const {mean,sd,q1,q3,iqr}=st;
+  const iqrLo=q1-params.iqr*iqr, iqrHi=q3+params.iqr*iqr;
+  const zLo=mean-params.z*sd, zHi=mean+params.z*sd;
+  const ma=movingAvg(vals, params.maWin);
+  const n=vals.length;
+  const tGrubbs=grubbsCritical(n, params.grubbs);
+
+  return arr.map((r,i)=>{
+    const v=r.value;
+    const iqrFlag=v<iqrLo||v>iqrHi;
+    const zFlag=v<zLo||v>zHi;
+    const maDev=ma[i]>0?Math.abs(v-ma[i])/ma[i]*100:0;
+    const maFlag=maDev>params.maPct;
+    const gStat=Math.abs(v-mean)/sd;
+    const grubbsFlag=gStat>tGrubbs;
+    const isAnomaly=iqrFlag||zFlag||maFlag||grubbsFlag;
+    const methods=[iqrFlag&&'IQR',zFlag&&'Z-score',maFlag&&'MA%',grubbsFlag&&'Grubbs'].filter(Boolean);
+    return {...r,iqrFlag,zFlag,maFlag,grubbsFlag,isAnomaly,methods,maDev,zScore:(v-mean)/sd};
+  });
+}
+
+function grubbsCritical(n, alpha){
+  const tCrit=2.756+(alpha<0.05?0.5:0);
+  return ((n-1)/Math.sqrt(n))*Math.sqrt((tCrit*tCrit)/(n-2+tCrit*tCrit));
+}
+
+function fmt(v){return typeof v==='number'?v.toFixed(1):v}
+function fmtDate(d){return d instanceof Date?`${d.getMonth()+1}/${d.getDate()}`:''}
+
+function polyFit(xs, ys, deg){
+  if(deg===0) return null;
+  const n=xs.length;
+  const A=[], b=[];
+  for(let i=0;i<n;i++){
+    const row=[];
+    for(let p=0;p<=deg;p++) row.push(Math.pow(xs[i],p));
+    A.push(row); b.push(ys[i]);
+  }
+  const AT=A[0].map((_,j)=>A.map(r=>r[j]));
+  const ATA=AT.map(r=>A[0].map((_,k)=>r.reduce((s,_,i2)=>s+r[i2]*A[i2][k],0)));
+  const ATb=AT.map(r=>r.reduce((s,v,i)=>s+v*b[i],0));
+  const m=ATA.length;
+  const aug=ATA.map((r,i)=>[...r,ATb[i]]);
+  for(let p=0;p<m;p++){
+    let maxR=p;
+    for(let r2=p+1;r2<m;r2++) if(Math.abs(aug[r2][p])>Math.abs(aug[maxR][p])) maxR=r2;
+    [aug[p],aug[maxR]]=[aug[maxR],aug[p]];
+    for(let r2=0;r2<m;r2++) if(r2!==p){
+      const f=aug[r2][p]/aug[p][p];
+      for(let c=0;c<=m;c++) aug[r2][c]-=f*aug[p][c];
+    }
+  }
+  const coef=aug.map((r,i)=>r[m]/r[i]);
+  return x=>coef.reduce((s,c,i)=>s+c*Math.pow(x,i),0);
+}
+
+function buildChart(canvasId, rows, anomRows, titleText){
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const type=document.getElementById('chartType').value;
+  const deg=parseInt(document.getElementById('trendDeg').value);
+  const labels=rows.map(r=>fmtDate(r.date));
+  const vals=rows.map(r=>r.value);
+  const anomIdx=new Set(anomRows.filter(r=>r.isAnomaly).map(r=>r.day));
+
+  const bgColors=vals.map((v,i)=>anomIdx.has(rows[i].day)?'rgba(233,69,96,0.7)':'rgba(59,130,246,0.5)');
+  const bdColors=vals.map((v,i)=>anomIdx.has(rows[i].day)?'#E94560':'#3B82F6');
+
+  const ds=[{
+    label:'Output',
+    data:vals,
+    borderColor:'#3B82F6',
+    backgroundColor: type==='line'?'rgba(59,130,246,0.08)':bgColors,
+    borderWidth:type==='line'?2:1,
+    pointRadius:type==='line'?vals.map((v,i)=>anomIdx.has(rows[i].day)?5:2):0,
+    pointBackgroundColor:bdColors,
+    fill:type==='line',
+    tension:0.3,
+    stack:type==='stacked'?'s':undefined
+  }];
+
+  if(deg>0){
+    const xs=rows.map((_,i)=>i);
+    const fn=polyFit(xs,vals,deg);
+    if(fn){
+      ds.push({
+        label:`Trend (deg ${deg})`,
+        data:xs.map(x=>fn(x)),
+        borderColor:'#F5A623',
+        borderWidth:2,
+        borderDash:[5,3],
+        pointRadius:0,
+        fill:false,
+        tension:0,
+        stack:undefined
+      });
+    }
+  }
+
+  charts[canvasId]=new Chart(ctx,{
+    type:type==='stacked'?'bar':type,
+    data:{labels,datasets:ds},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        callbacks:{
+          afterBody(items){
+            const i=items[0].dataIndex;
+            if(anomIdx.has(rows[i].day)) return['⚠ Anomaly detected'];
+            return[];
+          }
+        }
+      }},
+      scales:{
+        x:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:10},maxTicksLimit:12,maxRotation:0}},
+        y:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:10},callback:v=>v.toFixed(0)},stacked:type==='stacked'}
+      }
+    }
+  });
+}
+
+function buildAllMinesChart(canvasId, filtered, anomaliesMap){
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const canvas=document.getElementById(canvasId); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const type=document.getElementById('chartType').value;
+  const deg=parseInt(document.getElementById('trendDeg').value);
+  const vMines=[...visibleMines];
+  if(!vMines.length) return;
+  const refRows=filtered[vMines[0]];
+  const labels=refRows.map(r=>fmtDate(r.date));
+  const ds=[];
+  vMines.forEach((mn,mi)=>{
+    const rows=filtered[mn]||[];
+    const col=MINE_COLORS[MINE_NAMES.indexOf(mn)];
+    const anomSet=new Set((anomaliesMap[mn]||[]).filter(r=>r.isAnomaly).map(r=>r.day));
+    const vals=rows.map(r=>r.value);
+    ds.push({
+      label:mn, data:vals,
+      borderColor:col, backgroundColor:type==='line'?col+'15':col+'90',
+      borderWidth:2, pointRadius:0, fill:type==='line',tension:0.3,stack:'s'
+    });
+    if(deg>0 && type==='line'){
+      const xs=rows.map((_,i)=>i);
+      const fn=polyFit(xs,vals,deg);
+      if(fn) ds.push({label:'',data:xs.map(x=>fn(x)),borderColor:col,borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,stack:undefined});
+    }
+  });
+  charts[canvasId]=new Chart(ctx,{
+    type:type==='stacked'?'bar':type,
+    data:{labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:10},maxTicksLimit:12,maxRotation:0}},
+        y:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:10},callback:v=>v.toFixed(0)},stacked:type==='stacked'}}
+    }
+  });
+}
+
+function totalStats(filtered){
+  const combined=[];
+  MINE_NAMES.forEach(mn=>(filtered[mn]||[]).forEach(r=>{
+    const ex=combined.find(c=>c.day===r.day);
+    if(ex) ex.value+=r.value; else combined.push({...r,value:r.value});
+  }));
+  return {data:combined, st:stats(combined)};
+}
+
+function render(){
+  filteredData=getWindow();
+  const selectedMine=document.getElementById('mineSelect').value;
+  const anomaliesMap={};
+  MINE_NAMES.forEach(mn=>{
+    const rows=filteredData[mn]||[];
+    const st=stats(rows);
+    anomaliesMap[mn]=detectAnomalies(rows, st);
+  });
+
+  const {data:totData, st:totSt}=totalStats(filteredData);
+  const totAnom=detectAnomalies(totData, totSt);
+
+  const viewMine=selectedMine==='__total__'?null:selectedMine;
+  const dispSt=viewMine?stats(filteredData[viewMine]||[]):totSt;
+  const dispAnom=viewMine?anomaliesMap[viewMine]:totAnom;
+  const dispRows=viewMine?filteredData[viewMine]:totData;
+  const anomCount=dispAnom.filter(r=>r.isAnomaly).length;
+
+  const content=document.getElementById('mainContent');
+  content.innerHTML=`
+    <div class="status-bar"><div class="status-dot"></div><span>Data refreshed &middot; ${dispRows.length} observations &middot; ${anomCount} anomalies detected &middot; Window: days ${params.startOff}–${params.startOff+params.winLen}</span></div>
+    <div class="stats-grid">
+      <div class="metric-card"><div class="metric-label">Mean daily output</div><div class="metric-val">${dispSt.mean?.toFixed(0)||'–'}</div><div class="metric-sub">units/day</div></div>
+      <div class="metric-card"><div class="metric-label">Std deviation</div><div class="metric-val">${dispSt.sd?.toFixed(1)||'–'}</div><div class="metric-sub">σ</div></div>
+      <div class="metric-card"><div class="metric-label">Median</div><div class="metric-val">${dispSt.median?.toFixed(0)||'–'}</div><div class="metric-sub">units</div></div>
+      <div class="metric-card"><div class="metric-label">IQR</div><div class="metric-val">${dispSt.iqr?.toFixed(0)||'–'}</div><div class="metric-sub">Q3 – Q1</div></div>
+      <div class="metric-card"><div class="metric-label">Anomalies</div><div class="metric-val" style="color:#E94560">${anomCount}</div><div class="metric-sub">of ${dispRows.length} days</div></div>
+      <div class="metric-card"><div class="metric-label">Observations</div><div class="metric-val">${dispRows.length}</div><div class="metric-sub">${viewMine||'all mines'}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">${viewMine||'All mines'} — production over time</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${MINE_NAMES.map((mn,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--color-text-secondary)"><span style="width:8px;height:8px;border-radius:50%;background:${MINE_COLORS[i]};flex-shrink:0"></span>${mn}</span>`).join('')}
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--color-text-secondary)"><span style="width:10px;height:3px;background:#E94560;flex-shrink:0"></span>Anomaly</span>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:260px"><canvas id="mainChart" role="img" aria-label="Mine production time series with anomaly highlights"></canvas></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Per-mine statistics</div></div>
+        <table class="anomaly-table">
+          <thead><tr><th>Mine</th><th>Mean</th><th>σ</th><th>Median</th><th>IQR</th><th>Anomalies</th></tr></thead>
+          <tbody>
+            ${MINE_NAMES.map((mn,mi)=>{
+              const s=stats(filteredData[mn]||[]);
+              const ac=(anomaliesMap[mn]||[]).filter(r=>r.isAnomaly).length;
+              return `<tr><td><span style="width:7px;height:7px;border-radius:50%;background:${MINE_COLORS[mi]};display:inline-block;margin-right:6px"></span>${mn}</td><td>${s.mean?.toFixed(0)}</td><td>${s.sd?.toFixed(1)}</td><td>${s.median?.toFixed(0)}</td><td>${s.iqr?.toFixed(0)}</td><td><span class="badge ${ac>10?'badge-spike':ac>5?'badge-neutral':'badge-drop'}">${ac}</span></td></tr>`;
+            }).join('')}
+            <tr style="font-weight:500"><td>Total</td><td>${totSt.mean?.toFixed(0)}</td><td>${totSt.sd?.toFixed(1)}</td><td>${totSt.median?.toFixed(0)}</td><td>${totSt.iqr?.toFixed(0)}</td><td><span class="badge badge-spike">${totAnom.filter(r=>r.isAnomaly).length}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Anomaly method breakdown</div></div>
+        <table class="anomaly-table">
+          <thead><tr><th>Mine</th><th>IQR</th><th>Z-score</th><th>MA %</th><th>Grubbs</th></tr></thead>
+          <tbody>
+            ${MINE_NAMES.map(mn=>{
+              const rows=anomaliesMap[mn]||[];
+              return `<tr><td style="font-size:11px">${mn}</td><td>${rows.filter(r=>r.iqrFlag).length}</td><td>${rows.filter(r=>r.zFlag).length}</td><td>${rows.filter(r=>r.maFlag).length}</td><td>${rows.filter(r=>r.grubbsFlag).length}</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Anomaly details — ${viewMine||'all mines'}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">${anomCount} events detected</div>
+      </div>
+      <div style="overflow-x:auto">
+      <table class="anomaly-table">
+        <thead><tr><th>Date</th><th>Mine</th><th>Value</th><th>Z-score</th><th>MA dev %</th><th>Type</th><th>Methods</th></tr></thead>
+        <tbody>
+          ${dispAnom.filter(r=>r.isAnomaly).slice(0,40).map(r=>`
+            <tr>
+              <td>${fmtDate(r.date)}</td>
+              <td style="font-size:11px">${r.mine}</td>
+              <td>${r.value?.toFixed(1)}</td>
+              <td>${r.zScore?.toFixed(2)}</td>
+              <td>${r.maDev?.toFixed(1)}%</td>
+              <td><span class="badge ${r.value>dispSt.mean?'badge-spike':'badge-drop'}">${r.value>dispSt.mean?'spike':'drop'}</span></td>
+              <td style="font-size:10px;color:var(--color-text-secondary)">${r.methods?.join(', ')}</td>
+            </tr>`).join('')}
+          ${dispAnom.filter(r=>r.isAnomaly).length>40?`<tr><td colspan="7" style="text-align:center;color:var(--color-text-secondary);font-size:12px">...and ${dispAnom.filter(r=>r.isAnomaly).length-40} more</td></tr>`:''}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  `;
+
+  setTimeout(()=>{
+    if(viewMine) buildChart('mainChart', filteredData[viewMine]||[], anomaliesMap[viewMine]||[], viewMine);
+    else buildAllMinesChart('mainChart', filteredData, anomaliesMap);
+  },50);
+}
+
+function setupSidebar(){
+  const sel=document.getElementById('mineSelect');
+  sel.innerHTML='<option value="__total__">All mines (total)</option>'+MINE_NAMES.map((m,i)=>`<option value="${m}">${m}</option>`).join('');
+
+  const ml=document.getElementById('mineList');
+  ml.innerHTML=MINE_NAMES.map((mn,mi)=>`
+    <div class="mine-chip active" data-mine="${mn}" onclick="toggleMine('${mn}',this)">
+      <div class="mine-dot" style="background:${MINE_COLORS[mi]}"></div>
+      <span>${mn}</span>
+    </div>`).join('');
+
+  function bind(id, paramKey, dispId, scale=1){
+    const el=document.getElementById(id);
+    el.addEventListener('input',()=>{
+      params[paramKey]=parseFloat(el.value);
+      document.getElementById(dispId).textContent=(params[paramKey]*scale).toFixed(paramKey==='grubbs'?2:1);
+      render();
+    });
+  }
+  bind('iqrMult','iqr','iqrVal');
+  bind('zscoreThresh','z','zscoreVal');
+  bind('maWin','maWin','maWinVal');
+  bind('maPct','maPct','maPctVal');
+  bind('grubbsSig','grubbs','grubbsVal');
+  document.getElementById('maWinVal').textContent='7';
+  document.getElementById('maPctVal').textContent='25';
+
+  document.getElementById('startRange').addEventListener('input',function(){
+    params.startOff=parseInt(this.value);
+    document.getElementById('startOff').textContent=params.startOff;
+    render();
+  });
+  document.getElementById('winRange').addEventListener('input',function(){
+    params.winLen=parseInt(this.value);
+    document.getElementById('winLen').textContent=params.winLen;
+    render();
+  });
+  document.getElementById('chartType').addEventListener('change',render);
+  document.getElementById('trendDeg').addEventListener('change',render);
+  document.getElementById('mineSelect').addEventListener('change',render);
+  document.getElementById('refreshBtn').addEventListener('click',()=>{generateData();render();});
+}
+
+window.toggleMine=function(mn, el){
+  if(visibleMines.has(mn)){if(visibleMines.size>1){visibleMines.delete(mn);el.classList.remove('active');}}
+  else{visibleMines.add(mn);el.classList.add('active');}
+  render();
+};
+
+function generatePDF(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, M=15, CW=W-2*M;
+  let y=M;
+
+  function hline(yp){doc.setDrawColor(220,220,220);doc.line(M,yp,W-M,yp);}
+  function sectionTitle(t,yp){
+    doc.setFillColor(26,26,46);doc.rect(M,yp,CW,8,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(245,166,35);
+    doc.text(t,M+3,yp+5.5);
+    return yp+12;
+  }
+  function label(t,v,col,row){
+    const x=M+col*(CW/2);const yl=y+row*7;
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(120,120,120);doc.text(t,x,yl);
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(30,30,30);doc.text(String(v),x,yl+4.5);
+  }
+  function checkPage(needed=20){if(y+needed>285){doc.addPage();y=M;}}
+
+  doc.setFillColor(26,26,46);doc.rect(0,0,W,38,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(245,166,35);
+  doc.text('Weyland-Yutani Corporation',M,16);
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(200,200,220);
+  doc.text('Mine Production Analytics Report',M,24);
+  doc.setFontSize(8);doc.setTextColor(150,150,180);
+  doc.text(`Generated: ${new Date().toLocaleDateString()} | Window: days ${params.startOff}–${params.startOff+params.winLen} | IQR×${params.iqr} | Z>${params.z}`,M,32);
+  y=48;
+
+  filteredData=getWindow();
+  const anomaliesMap={};
+  MINE_NAMES.forEach(mn=>{const rows=filteredData[mn]||[];anomaliesMap[mn]=detectAnomalies(rows,stats(rows));});
+  const {data:totData,st:totSt}=totalStats(filteredData);
+  const totAnom=detectAnomalies(totData,totSt);
+
+  y=sectionTitle('FLEET SUMMARY STATISTICS',y);
+  const allMines=[...MINE_NAMES,'TOTAL'];
+  const allSt=[...MINE_NAMES.map(mn=>stats(filteredData[mn]||[])),totSt];
+  const allAn=[...MINE_NAMES.map(mn=>(anomaliesMap[mn]||[]).filter(r=>r.isAnomaly).length),totAnom.filter(r=>r.isAnomaly).length];
+
+  const colW=[50,22,22,22,22,22,25];
+  const headers=['Mine','Mean','σ','Median','IQR','Anomalies','IQR/Z/MA/Gr'];
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(80,80,80);
+  let xc=M;
+  headers.forEach((h,i)=>{doc.text(h,xc,y);xc+=colW[i];});
+  y+=2;hline(y);y+=3;
+
+  allMines.forEach((mn,mi)=>{
+    checkPage(8);
+    const s=allSt[mi]; const ac=allAn[mi];
+    const rows2=mn==='TOTAL'?totData:(filteredData[mn]||[]);
+    const am=mn==='TOTAL'?totAnom:(anomaliesMap[mn]||[]);
+    doc.setFont(mn==='TOTAL'?'helvetica':'helvetica', mn==='TOTAL'?'bold':'normal');
+    doc.setFontSize(8);doc.setTextColor(mn==='TOTAL'?26:50,mn==='TOTAL'?26:50,mn==='TOTAL'?46:50);
+    const row=[mn, s.mean?.toFixed(0), s.sd?.toFixed(1), s.median?.toFixed(0), s.iqr?.toFixed(0), ac,
+      `${am.filter(r=>r.iqrFlag).length}/${am.filter(r=>r.zFlag).length}/${am.filter(r=>r.maFlag).length}/${am.filter(r=>r.grubbsFlag).length}`];
+    xc=M; row.forEach((v,i)=>{doc.text(String(v),xc,y);xc+=colW[i];});
+    y+=6; hline(y); y+=2;
+  });
+  y+=6;
+
+  MINE_NAMES.forEach(mn=>{
+    checkPage(50);
+    y=sectionTitle(`MINE: ${mn}`,y);
+    const s=stats(filteredData[mn]||[]);
+    const am=anomaliesMap[mn]||[];
+    const spikes=am.filter(r=>r.isAnomaly&&r.value>s.mean);
+    const drops=am.filter(r=>r.isAnomaly&&r.value<=s.mean);
+
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(50,50,50);
+    doc.text(`Mean: ${s.mean?.toFixed(1)}  |  Std Dev: ${s.sd?.toFixed(1)}  |  Median: ${s.median?.toFixed(1)}  |  IQR: ${s.iqr?.toFixed(1)}  |  Total anomalies: ${am.filter(r=>r.isAnomaly).length} (${spikes.length} spikes, ${drops.length} drops)`,M,y);
+    y+=8;
+
+    if(spikes.length||drops.length){
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(90,90,90);
+      doc.text('Date',M,y);doc.text('Value',M+22,y);doc.text('Z-score',M+40,y);doc.text('MA dev%',M+58,y);doc.text('Type',M+76,y);doc.text('Methods',M+92,y);
+      y+=3;hline(y);y+=4;
+      [...spikes,...drops].slice(0,15).forEach(r=>{
+        checkPage(6);
+        const typ=r.value>s.mean?'spike':'drop';
+        doc.setFont('helvetica','normal');doc.setFontSize(8);
+        doc.setTextColor(typ==='spike'?153:24,typ==='spike'?60:116,typ==='spike'?29:201);
+        doc.text(fmtDate(r.date),M,y);
+        doc.setTextColor(50,50,50);
+        doc.text(r.value?.toFixed(1),M+22,y);doc.text(r.zScore?.toFixed(2),M+40,y);
+        doc.text(r.maDev?.toFixed(1)+'%',M+58,y);doc.text(typ,M+76,y);doc.text(r.methods?.join(', '),M+92,y);
+        y+=5.5;
+      });
+    }
+    y+=4;
+  });
+
+  doc.save('WeylandYutani_Mine_Report.pdf');
+}
+
+document.getElementById('pdfBtn').addEventListener('click',()=>document.getElementById('pdfModal').classList.add('open'));
+document.getElementById('pdfCancelBtn').addEventListener('click',()=>document.getElementById('pdfModal').classList.remove('open'));
+document.getElementById('pdfConfirmBtn').addEventListener('click',()=>{
+  document.getElementById('pdfModal').classList.remove('open');
+  generatePDF();
+});
+
+generateData();
+setupSidebar();
+render();
+</script>
